@@ -137,7 +137,7 @@ class TpsTaskLoader(TaskLoader):
 
         # Statements
         if get_statement:
-            statements_dir = os.path.join(self.path, 'statements')
+            statements_dir = os.path.join(self.path, 'statement')
             if os.path.exists(statements_dir):
                 statements = [
                     filename
