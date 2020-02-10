@@ -190,32 +190,33 @@ class TpsTaskLoader(TaskLoader):
         else:
             args["submission_format"] = ["%s.%%l" % name]
 
-        # These options cannot be configured in the TPS format.
-        # Uncomment the following to set specific values for them.
+        # Task information
+        if 'feedback_level' in data:
+            args['feedback_level'] = data['feedback_level']
 
-        # args['max_user_test_number'] = 10
-        # args['min_user_test_interval'] = make_timedelta(60)
+        # Tokens parameters
 
-        # args['token_mode'] = 'infinite'
-        # args['token_max_number'] = 100
-        # args['token_min_interval'] = make_timedelta(60)
-        # args['token_gen_initial'] = 1
-        # args['token_gen_number'] = 1
-        # args['token_gen_interval'] = make_timedelta(1800)
-        # args['token_gen_max'] = 2
+        # Limits
+        if 'max_submission_number' in data:
+            args['max_submission_number'] = data['max_submission_number']
+        if 'max_user_test_number' in data:
+            args['max_user_test_number'] = data['max_user_test_number']
+        if 'min_submission_interval' in data:
+            if data['min_submission_interval'] is None:
+                args['min_submission_interval'] = None
+            else:
+                args['min_submission_interval'] = make_timedelta(data['min_submission_interval'])
+        if 'min_user_test_interval' in data:
+            if data['min_user_test_interval'] is None:
+                args['min_user_test_interval'] = None
+            else:
+                args['min_user_test_interval'] = make_timedelta(data['min_user_test_interval'])
 
-        if "score_precision" in data:
-            args['score_precision'] = int(data["score_precision"])
-        else:
-            args['score_precision'] = 2
-        args['max_submission_number'] = 50
-        args['max_user_test_number'] = 50
-        if data["task_type"] == 'OutputOnly':
-            args['max_submission_number'] = 100
-            args['max_user_test_number'] = 100
-
-        args['min_submission_interval'] = make_timedelta(60)
-        args['min_user_test_interval'] = make_timedelta(60)
+        # Score options
+        if 'score_precision' in data:
+            args['score_precision'] = int(data['score_precision'])
+        if 'score_mode' in data:
+            args['score_mode'] = data['score_mode']
 
         task = Task(**args)
 
