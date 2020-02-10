@@ -133,7 +133,7 @@ class TpsTaskLoader(TaskLoader):
         args = {}
 
         args["name"] = name
-        args["title"] = data['name']
+        args["title"] = data['title']
 
         # Statements
         if get_statement:
