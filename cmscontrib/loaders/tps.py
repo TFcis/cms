@@ -355,6 +355,8 @@ class TpsTaskLoader(TaskLoader):
                     re.escape(testcase)
                     for testcase in mapping_data[subtask]
                 )
+                if testcases == '':
+                    testcases = 'NO_TESTCASES_AVAILABLE'
                 optional_name = "Subtask %d" % subtask_no
                 if subtask_no == 0 and score == 0:
                     add_optional_name = True
