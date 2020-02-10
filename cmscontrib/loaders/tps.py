@@ -326,14 +326,8 @@ class TpsTaskLoader(TaskLoader):
             args["testcases"][codename] = testcase
 
         # Score Type
-        subtasks_dir = os.path.join(self.path, 'subtasks')
-        if not os.path.exists(subtasks_dir):
-            logger.warning('Subtask folder was not found')
-            subtasks = []
-        else:
-            subtasks = sorted(os.listdir(subtasks_dir))
-
-        if len(subtasks) == 0:
+        subtasks_json_src = os.path.join(self.path, 'subtasks.json')
+        if not os.path.exists(subtasks_json_src):
             number_tests = max(len(testcase_codenames), 1)
             args["score_type"] = "Sum"
             args["score_type_parameters"] = 100 / number_tests
@@ -342,24 +336,32 @@ class TpsTaskLoader(TaskLoader):
             parsed_data = []
             subtask_no = -1
             add_optional_name = False
-            for subtask in subtasks:
+            mapping_src = os.path.join(self.path, 'tests', 'mapping')
+            mapping_data = {}
+            with open(mapping_src, 'rt', encoding='utf-8') as mapping_file:
+                for row in mapping_file:
+                    row = row.strip().split(' ')
+                    if len(row) == 2:
+                        if row[0] not in mapping_data:
+                            mapping_data[row[0]] = []
+                        mapping_data[row[0]].append(row[1])
+            with open(subtasks_json_src, 'rt', encoding='utf-8') as json_file:
+                subtasks_data = json.load(json_file)
+            for subtask, subtask_data in subtasks_data['subtasks'].items():
                 subtask_no += 1
-                with io.open(os.path.join(subtasks_dir, subtask), 'rt',
-                             encoding='utf-8') as subtask_json:
-                    subtask_data = json.load(subtask_json)
-                    score = int(subtask_data["score"])
-                    testcases = "|".join(
-                        re.escape(testcase)
-                        for testcase in subtask_data["testcases"]
-                    )
-                    optional_name = "Subtask %d" % subtask_no
-                    if subtask_no == 0 and score == 0:
-                        add_optional_name = True
-                        optional_name = "Samples"
-                    if add_optional_name:
-                        parsed_data.append([score, testcases, optional_name])
-                    else:
-                        parsed_data.append([score, testcases])
+                score = int(subtask_data["score"])
+                testcases = "|".join(
+                    re.escape(testcase)
+                    for testcase in mapping_data[subtask]
+                )
+                optional_name = "Subtask %d" % subtask_no
+                if subtask_no == 0 and score == 0:
+                    add_optional_name = True
+                    optional_name = "Samples"
+                if add_optional_name:
+                    parsed_data.append([score, testcases, optional_name])
+                else:
+                    parsed_data.append([score, testcases])
             args["score_type_parameters"] = parsed_data
 
         dataset = Dataset(**args)
