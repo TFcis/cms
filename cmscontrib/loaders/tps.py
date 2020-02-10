@@ -339,15 +339,15 @@ class TpsTaskLoader(TaskLoader):
             add_optional_name = False
             mapping_src = os.path.join(self.path, 'tests', 'mapping')
             mapping_data = {}
+            with open(subtasks_json_src, 'rt', encoding='utf-8') as json_file:
+                subtasks_data = json.load(json_file)
+            for subtask in subtasks_data['subtasks']:
+                mapping_data[subtask] = []
             with open(mapping_src, 'rt', encoding='utf-8') as mapping_file:
                 for row in mapping_file:
                     row = row.strip().split(' ')
                     if len(row) == 2:
-                        if row[0] not in mapping_data:
-                            mapping_data[row[0]] = []
                         mapping_data[row[0]].append(row[1])
-            with open(subtasks_json_src, 'rt', encoding='utf-8') as json_file:
-                subtasks_data = json.load(json_file)
             for subtask, subtask_data in subtasks_data['subtasks'].items():
                 subtask_no += 1
                 score = int(subtask_data["score"])
