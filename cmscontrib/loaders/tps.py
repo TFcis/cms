@@ -237,7 +237,12 @@ class TpsTaskLoader(TaskLoader):
         checker_dir = os.path.join(self.path, "checker")
         checker_src = os.path.join(checker_dir, "checker.cpp")
 
-        if os.path.exists(checker_src):
+        ignore_checker = data['ignore_checker'] if 'ignore_checker' in data else False
+
+        if ignore_checker:
+            logger.info("Checker is ignored, using diff if necessary")
+            evaluation_param = "diff"
+        elif os.path.exists(checker_src):
             logger.info("Checker found, compiling")
             checker_exe = os.path.join(checker_dir, "checker")
             subprocess.call([
