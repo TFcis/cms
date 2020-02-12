@@ -133,7 +133,10 @@ class TpsTaskLoader(TaskLoader):
         args = {}
 
         args["name"] = name
-        args["title"] = data['title']
+        if 'problem_label' in data:
+            args['title'] = '{}. {}'.format(data['problem_label'], data['title'])
+        else:
+            args['title'] = data['title']
 
         # Statements
         if get_statement:
