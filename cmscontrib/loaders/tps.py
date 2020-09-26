@@ -223,6 +223,14 @@ class TpsTaskLoader(TaskLoader):
 
         task = Task(**args)
 
+        mapping_src = os.path.join(self.path, 'tests', 'mapping')
+
+        if not os.path.exists(mapping_src):
+            logger.info("Task parameters loaded.")
+            logger.info("Dataset loading skipped.")
+
+            return task
+
         args = dict()
 
         args["task"] = task
@@ -345,7 +353,6 @@ class TpsTaskLoader(TaskLoader):
             parsed_data = []
             subtask_no = -1
             add_optional_name = False
-            mapping_src = os.path.join(self.path, 'tests', 'mapping')
             mapping_data = {}
             with open(subtasks_json_src, 'rt', encoding='utf-8') as json_file:
                 subtasks_data = json.load(json_file)
