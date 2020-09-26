@@ -160,15 +160,16 @@ class TpsTaskLoader(TaskLoader):
                     args['statements'][language] = Statement(language, digest)
 
         # Attachments
-        args["attachments"] = dict()
-        attachments_dir = os.path.join(self.path, 'attachments')
-        if os.path.exists(attachments_dir):
-            logger.info("Attachments found")
-            for filename in os.listdir(attachments_dir):
-                digest = self.file_cacher.put_file_from_path(
-                    os.path.join(attachments_dir, filename),
-                    "Attachment %s for task %s" % (filename, name))
-                args["attachments"][filename] = Attachment(filename, digest)
+        if get_statement:
+            args["attachments"] = dict()
+            attachments_dir = os.path.join(self.path, 'attachments')
+            if os.path.exists(attachments_dir):
+                logger.info("Attachments found")
+                for filename in os.listdir(attachments_dir):
+                    digest = self.file_cacher.put_file_from_path(
+                        os.path.join(attachments_dir, filename),
+                        "Attachment %s for task %s" % (filename, name))
+                    args["attachments"][filename] = Attachment(filename, digest)
 
         data["task_type"] = \
             data["task_type"][0].upper() + data["task_type"][1:]
