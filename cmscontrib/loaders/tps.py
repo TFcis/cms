@@ -224,9 +224,9 @@ class TpsTaskLoader(TaskLoader):
 
         task = Task(**args)
 
-        mapping_src = os.path.join(self.path, 'tests', 'mapping')
+        ignore_datasets = data['ignore_datasets'] if 'ignore_datasets' in data else False
 
-        if not os.path.exists(mapping_src):
+        if ignore_datasets:
             logger.info("Task parameters loaded.")
             logger.info("Dataset loading skipped.")
 
@@ -353,29 +353,37 @@ class TpsTaskLoader(TaskLoader):
             args["score_type"] = "GroupMin"
             parsed_data = []
             subtask_no = -1
-            add_optional_name = False
-            mapping_data = {}
+            mapping_src = os.path.join(self.path, 'tests', 'mapping')
             with open(subtasks_json_src, 'rt', encoding='utf-8') as json_file:
                 subtasks_data = json.load(json_file)
-            for subtask in subtasks_data['subtasks']:
-                mapping_data[subtask] = []
-            with open(mapping_src, 'rt', encoding='utf-8') as mapping_file:
-                for row in mapping_file:
-                    row = row.strip().split(' ')
-                    if len(row) == 2:
-                        mapping_data[row[0]].append(row[1])
+
+            use_mapping = os.path.exists(mapping_src)
+            if use_mapping:
+                mapping_data = {}
+                for subtask in subtasks_data['subtasks']:
+                    mapping_data[subtask] = []
+                with open(mapping_src, 'rt', encoding='utf-8') as mapping_file:
+                    for row in mapping_file:
+                        row = row.strip().split(' ')
+                        if len(row) == 2:
+                            mapping_data[row[0]].append(row[1])
+
+            add_optional_name = data['add_optional_name'] if 'add_optional_name' in data else False
+
             for subtask, subtask_data in subtasks_data['subtasks'].items():
                 subtask_no += 1
                 score = int(subtask_data["score"])
-                testcases = "|".join(
-                    re.escape(testcase)
-                    for testcase in mapping_data[subtask]
-                )
-                if testcases == '':
-                    testcases = '|NO_TESTCASES_AVAILABLE'
+                if use_mapping:
+                    testcases = "|".join(
+                        re.escape(testcase)
+                        for testcase in mapping_data[subtask]
+                    )
+                    if testcases == '':
+                        testcases = '|NO_TESTCASES_AVAILABLE'
+                else:
+                    testcases = subtask_data["regex"]
                 optional_name = "Subtask %d" % subtask_no
                 if subtask_no == 0 and score == 0:
-                    add_optional_name = True
                     optional_name = "Samples"
                 if add_optional_name:
                     parsed_data.append([score, testcases, optional_name])
